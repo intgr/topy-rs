@@ -1,0 +1,20 @@
+[package]
+name = "topy-rs"
+version = "0.1.0"
+edition = "2018"
+
+# Metadata
+authors = ["Marti Raudsepp <marti@juffo.org>"]
+description = "Python script to fix typos in text, based on the RegExTypoFix project from Wikipedia"
+#readme = "README.md"
+license = "MIT AND CC-BY-SA-3.0"
+homepage = "https://github.com/intgr/topy-rs"
+repository = "https://github.com/intgr/topy-rs"
+keywords = ["typos", "spelling", "grammar", "text"]
+categories = ["text-processing", "command-line-utilities"]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ansi_term = "0.12.1"
+fancy-regex = "0.6.0"
+log = { version = "0.4.14", features = ["std"] }
