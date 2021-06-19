@@ -1,8 +1,10 @@
+use fancy_regex::Error::LookBehindNotConst;
 use fancy_regex::Regex;
 use log::{debug, info, trace};
 
 #[derive(Debug)]
-pub struct RawRule {
+/// Temporary struct
+struct RawRule {
     // word=
     label: String,
     // find=
@@ -11,7 +13,43 @@ pub struct RawRule {
     replace: String,
 }
 
-pub fn parse_rules(text: &str) -> Vec<RawRule> {
+/// Result of parsing
+pub struct TypoRule {
+    label: String,
+    regex: Regex,
+    replace: String,
+}
+
+struct FileParseResult {
+    rules: Vec<RawRule>,
+    // stats
+    disabled: u32,
+    tag_errors: u32,
+}
+
+struct CompileResult {
+    rules: Vec<TypoRule>,
+    backref_errors: u32,
+    regex_errors: u32,
+}
+
+/// Parse rules file and compile Regexes
+pub fn parse_and_compile(text: &str) -> Vec<TypoRule> {
+    let result = parse_rules_file(text);
+    let compiled = compile_rules(result.rules);
+
+    info!(
+        "Loaded rules: {}, disabled: {}, errors: (backref: {}, regex: {}, tag: {})",
+        compiled.rules.len(),
+        result.disabled,
+        compiled.backref_errors,
+        compiled.regex_errors,
+        result.tag_errors
+    );
+    compiled.rules
+}
+
+fn parse_rules_file(text: &str) -> FileParseResult {
     // <Typo word="bias" find="\b([bB])iais\b" replace="$1ias"/>
     let tag_re = Regex::new(r#"<Typo(\s+[a-z_-]+="[^"\n]*")+\s*/>"#).unwrap();
     let attr_re = Regex::new(r#"([a-z_-]+)="([^"\n]*)""#).unwrap();
@@ -67,25 +105,51 @@ pub fn parse_rules(text: &str) -> Vec<RawRule> {
         }
         let replace = replace.unwrap().to_string();
 
-        // TODO: Do something with the Regex
-        if let Err(err) = Regex::new(pattern.as_str()) {
-            tag_errors += 1;
-            debug!("Error parsing '{}' rule: {}", label, err);
-        }
-
-        let rule = RawRule {
+        rules.push(RawRule {
             label,
             pattern,
             replace,
-        };
-        rules.push(rule);
+        })
     }
 
-    info!(
-        "Finished (rules: {}, errors: {}, disabled: {})",
-        rules.len(),
+    FileParseResult {
+        rules,
+        disabled,
         tag_errors,
-        disabled
-    );
-    rules
+    }
+}
+
+fn compile_rules(rules: Vec<RawRule>) -> CompileResult {
+    let (results, errors): (Vec<_>, Vec<_>) = rules
+        .into_iter()
+        .map(move |raw| -> Result<TypoRule, fancy_regex::Error> {
+            Ok(TypoRule {
+                label: raw.label,
+                regex: Regex::new(raw.pattern.as_str())?,
+                replace: raw.replace,
+            })
+        })
+        .partition(Result::is_ok);
+
+    let mut regex_errors = 0u32;
+    let mut backref_errors = 0u32;
+
+    for error in errors {
+        match error {
+            Err(LookBehindNotConst) => {
+                // debug!("Lookbehind error: rule '{}' regex '{}'", label, pattern);
+                backref_errors += 1;
+            }
+            _err => {
+                // debug!("Regex error in '{}': {}", label, err);
+                regex_errors += 1;
+            }
+        }
+    }
+
+    CompileResult {
+        rules: results.into_iter().map(Result::unwrap).collect(),
+        regex_errors,
+        backref_errors,
+    }
 }
