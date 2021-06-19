@@ -16,9 +16,9 @@ struct RawRule {
 
 /// Result of parsing
 pub struct TypoRule {
-    label: String,
-    regex: Regex,
-    replace: String,
+    pub label: String,
+    pub regex: Regex,
+    pub replace: String,
 }
 
 struct FileParseResult {
