@@ -18,3 +18,4 @@ categories = ["text-processing", "command-line-utilities"]
 ansi_term = "0.12.1"
 fancy-regex = "0.6.0"
 log = { version = "0.4.14", features = ["std"] }
+rayon = "1.5.0"

@@ -1,6 +1,7 @@
 use fancy_regex::Error::LookBehindNotConst;
 use fancy_regex::Regex;
 use log::{debug, info, trace};
+use rayon::prelude::*;
 
 #[derive(Debug)]
 /// Temporary struct
@@ -121,7 +122,7 @@ fn parse_rules_file(text: &str) -> FileParseResult {
 
 fn compile_rules(rules: Vec<RawRule>) -> CompileResult {
     let (results, errors): (Vec<_>, Vec<_>) = rules
-        .into_iter()
+        .into_par_iter()
         .map(move |raw| -> Result<TypoRule, fancy_regex::Error> {
             Ok(TypoRule {
                 label: raw.label,
