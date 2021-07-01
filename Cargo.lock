@@ -100,8 +100,7 @@ checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
 [[package]]
 name = "fancy-regex"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a3371ac125221b609ce0cf587a53fbb624fb56267bbe85cf1929350043bf360"
+source = "git+https://github.com/intgr/fancy-regex?branch=add-replace-methods#af17e3738be1b91519fb6a905f0bd74b04e8107a"
 dependencies = [
  "bit-set",
  "regex",
