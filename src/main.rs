@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate lazy_static;
+
 use crate::tagsoup::{parse_and_compile, TypoRule};
 use log::{debug, error, info};
 use rayon::prelude::*;

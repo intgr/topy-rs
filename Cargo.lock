@@ -215,6 +215,7 @@ version = "0.1.0"
 dependencies = [
  "ansi_term",
  "fancy-regex",
+ "lazy_static",
  "log",
  "rayon",
 ]

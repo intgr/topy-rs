@@ -2,6 +2,7 @@ use fancy_regex::Error::LookBehindNotConst;
 use fancy_regex::Regex;
 use log::{debug, info, trace};
 use rayon::prelude::*;
+use std::borrow::Cow;
 
 #[derive(Debug)]
 /// Temporary struct
@@ -120,6 +121,22 @@ fn parse_rules_file(text: &str) -> FileParseResult {
     }
 }
 
+lazy_static! {
+    static ref SUBSTITUTION_RE: Regex = Regex::new(r#"\$([0-9]+)"#).unwrap();
+}
+
+/// Replace substitution group references like `$1` with `${1}`.
+/// Because regex and fancy-regex replacement syntax differs from the one expected by Wikipedia
+/// rulesets.
+///
+/// See: https://github.com/rust-lang/regex/issues/69
+fn convert_replace_string(input: String) -> String {
+    match SUBSTITUTION_RE.replace_all(input.as_str(), "$${$1}") {
+        Cow::Borrowed(_) => input, // Unchanged -- return input without copying
+        Cow::Owned(val) => val,
+    }
+}
+
 fn compile_rules(rules: Vec<RawRule>) -> CompileResult {
     let (results, errors): (Vec<_>, Vec<_>) = rules
         .into_par_iter()
@@ -127,7 +144,7 @@ fn compile_rules(rules: Vec<RawRule>) -> CompileResult {
             Ok(TypoRule {
                 label: raw.label,
                 regex: Regex::new(raw.pattern.as_str())?,
-                replace: raw.replace,
+                replace: convert_replace_string(raw.replace),
             })
         })
         .partition(Result::is_ok);
