@@ -107,18 +107,10 @@ fn parse_rules_file(text: &str) -> FileParseResult {
         }
         let replace = replace.unwrap().to_string();
 
-        rules.push(RawRule {
-            label,
-            pattern,
-            replace,
-        })
+        rules.push(RawRule { label, pattern, replace })
     }
 
-    FileParseResult {
-        rules,
-        disabled,
-        tag_errors,
-    }
+    FileParseResult { rules, disabled, tag_errors }
 }
 
 lazy_static! {
@@ -140,7 +132,7 @@ fn convert_replace_string(input: String) -> String {
 fn compile_rules(rules: Vec<RawRule>) -> CompileResult {
     let (results, errors): (Vec<_>, Vec<_>) = rules
         .into_par_iter()
-        .map(move |raw| -> Result<TypoRule, fancy_regex::Error> {
+        .map(|raw| -> Result<TypoRule, fancy_regex::Error> {
             Ok(TypoRule {
                 label: raw.label,
                 regex: Regex::new(raw.pattern.as_str())?,

@@ -47,11 +47,7 @@ fn apply_file_inner(rules: &[TypoRule], path: &OsString) -> Result<u32, AnyErr> 
             continue;
         }
         if contents == result {
-            debug!(
-                "{}: '{}' had a no-op match",
-                path.to_string_lossy(),
-                rule.label
-            );
+            debug!("{}: '{}' had a no-op match", path.to_string_lossy(), rule.label);
             continue;
         }
 
