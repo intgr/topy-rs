@@ -16,7 +16,7 @@ categories = ["text-processing", "command-line-utilities"]
 
 [dependencies]
 ansi_term = "0.12.1"
-fancy-regex = { git = "https://github.com/intgr/fancy-regex", branch = "add-replace-methods" }
+fancy-regex = "0.7.0"
 lazy_static = "1.4.0"
 log = { version = "0.4.14", features = ["std"] }
-rayon = "1.5.0"
+rayon = "1.5.1"
